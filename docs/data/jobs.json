@@ -1,0 +1,37 @@
+{
+ "generated_at": null,
+ "min_relevance": 35,
+ "profile": {
+  "hide_duration_mismatch": true,
+  "hide_languages": [],
+  "hide_phd_only": true,
+  "kinds": [
+   "internship"
+  ],
+  "min_monthly_salary_chf": null,
+  "target_duration_months": 6,
+  "target_start": [
+   "2027-08",
+   "2027-09"
+  ]
+ },
+ "site": {
+  "repo_url": "",
+  "title": "Swiss AI Internship Radar",
+  "url": ""
+ },
+ "sources": [],
+ "stats": {
+  "companies": 0,
+  "fits": 0,
+  "jobs": 0,
+  "new": 0,
+  "sources_error": 0,
+  "sources_ok": 0,
+  "sources_skipped": 0
+ },
+ "version": 1,
+ "jobs": [
+
+ ]
+}

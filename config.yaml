@@ -1,0 +1,43 @@
+# Your preferences. The website opens with these filters (you can still change them in the page),
+# and alerts only announce postings that fit them.
+
+profile:
+  # When you want to start (YYYY-MM). A posting starting within ±1 month counts as a fit.
+  target_start: ["2027-08", "2027-09"]
+  # Internship length you want, in months: "6", "4–6" and "6–12" fit; "12" or "3–4" don't.
+  target_duration_months: 6
+  # Hide postings that explicitly state another duration (e.g. "12-month internship").
+  # Postings that don't mention a duration are always kept.
+  hide_duration_mismatch: true
+  hide_phd_only: true
+  # Hide postings that require these languages besides English, e.g. ["de"].
+  hide_languages: []
+  # Hide postings whose *stated* pay is below this (CHF / month). Most ads state no pay; those stay.
+  min_monthly_salary_chf: null
+  # Kinds the site shows by default (internship, thesis, working_student).
+  kinds: [internship]
+
+filters:
+  min_relevance: 35          # 0-100 AI/ML/data score. Lower = broader (more software / analytics roles)
+  keep_kinds: [internship, thesis, working_student]
+  # Whole words; titles containing them are dropped. Not targeting quant finance:
+  exclude_title_keywords: [quant, quantitative analyst, quantitative researcher, quantitative research, trader, trading]
+  drop_stale_after_days: 10  # keep a failing source's last postings this long
+
+scraper:
+  concurrency: 8
+  per_host: 2                # be polite: at most 2 parallel requests per website
+  timeout: 25
+  max_details_per_source: 40
+  max_pages: 10
+  workday_search: [intern, internship, praktikum, praktikant, stage, stagiaire, student, thesis]
+  browser: auto              # auto | on | off — headless Chromium for Google / Apple / Meta / Microsoft / IBM
+
+notify:
+  only_matching: true        # alert only for postings that fit the profile above
+  max_items: 40
+
+site:
+  title: Swiss AI Internship Radar
+  repo_url: ""               # e.g. https://github.com/<you>/swiss-intern-radar (link in the footer)
+  url: ""                    # leave empty: detected on GitHub as https://<you>.github.io/<repo>/

@@ -1,0 +1,80 @@
+name: radar
+
+on:
+  schedule:
+    - cron: "17 5 * * *"     # every day at 05:17 UTC (06:17 in Zürich in winter, 07:17 in summer)
+  workflow_dispatch:          # "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write    # commit the refreshed data (keeps "first seen" dates between runs)
+  issues: write      # open an issue when new internships appear -> GitHub emails you
+  pages: write       # publish the website
+  id-token: write
+
+concurrency:
+  group: radar
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Install headless browser (Google, Apple, Meta, Microsoft, IBM career pages)
+        if: vars.ENABLE_BROWSER != 'false'
+        run: |
+          pip install -r requirements-browser.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Scrape
+        id: scrape
+        env:
+          RADAR_BROWSER: ${{ vars.ENABLE_BROWSER == 'false' && '0' || '1' }}
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python -m internradar scrape --notify
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "data: refresh $(date -u +%F)"
+            git pull --rebase --autostash
+            git push
+          fi
+
+      - name: Open an issue for new internships
+        if: steps.scrape.outputs.new_count != '' && steps.scrape.outputs.new_count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --title "$(cat out/new_jobs_title.txt)" --body-file out/new_jobs.md \
+            --assignee "${{ github.repository_owner }}" \
+            || gh issue create --title "$(cat out/new_jobs_title.txt)" --body-file out/new_jobs.md
+
+      - name: Package the website
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs
+
+      - name: Publish the website
+        id: deploy
+        uses: actions/deploy-pages@v5

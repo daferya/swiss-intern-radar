@@ -1,0 +1,225 @@
+# Where the radar looks. Each company lists one or more sources:
+#
+#   greenhouse | lever | ashby | workable | recruitee | personio | smartrecruiters
+#        {ats: <type>, slug: <board name>}     slug can be a list of guesses: the first that exists wins
+#   workday   {ats: workday, host: <tenant>.wdN.myworkdayjobs.com, site: <SiteName>}   (site optional)
+#   html      server-rendered career page: {ats: html, urls: [...], link_pattern: <regex>}
+#   browser   JavaScript career page (needs Playwright), same fields as html
+#   amazon    amazon.jobs search            adzuna   aggregator (needs a free API key)
+#   auto      ATS unknown: the radar probes the common free APIs and remembers what it finds
+#
+# "verified" = a live job URL on that board was seen in November 2026. Everything else is a
+# best guess: after the first run, the website footer ("Sources") and `python -m internradar check`
+# show which ones work. Find a company's board with `python -m internradar discover "Name"`.
+# Quant / trading firms are intentionally not listed.
+
+companies:
+
+  # ---------------------------------------------------------------- AI labs & big tech
+  - name: Anthropic
+    sector: AI lab
+    sources: [{ats: greenhouse, slug: anthropic}]                 # verified (Zürich roles)
+  - name: Google DeepMind
+    sector: AI lab
+    sources: [{ats: greenhouse, slug: deepmind}]                  # verified (moving to Google Careers)
+  - name: OpenAI
+    sector: AI lab
+    sources: [{ats: ashby, slug: openai}]                         # verified (Zürich office)
+  - name: Mistral AI
+    sector: AI lab
+    sources: [{ats: lever, slug: mistral}]                        # verified (Zürich roles)
+  - name: Isomorphic Labs
+    sector: AI lab
+    sources: [{ats: greenhouse, slug: isomorphiclabs}]            # verified (Lausanne office)
+  - name: RAI Institute
+    sector: Robotics
+    sources: [{ats: lever, slug: rai}]                            # verified (Zürich internships)
+  - name: Hugging Face
+    sector: AI lab
+    sources: [{ats: workable, slug: huggingface}]                 # mostly remote roles
+  - name: Sony AI
+    sector: AI lab
+    sources:
+      - ats: html
+        urls: ["https://ai.sony/joinus/"]
+        link_pattern: "/joinus/job-roles/[A-Za-z0-9_%-]+/?$"
+        fetch_details: true                                       # reads "Location flexible (Tokyo, Zurich)"
+  - name: NVIDIA
+    sector: Big tech
+    sources: [{ats: workday, host: nvidia.wd5.myworkdayjobs.com, site: NVIDIAExternalCareerSite}]  # verified
+  - name: Pinterest
+    sector: Big tech
+    sources: [{ats: greenhouse, slug: [pinterest, pinterestjobadvertisements]}]  # Greenhouse verified; ML interns in Zürich
+  - name: Amazon
+    sector: Big tech
+    sources: [{ats: amazon}]
+  - name: Google
+    sector: Big tech
+    sources:
+      - ats: browser
+        urls: ["https://www.google.com/about/careers/applications/jobs/results?q=intern&location=Switzerland"]
+        link_pattern: "/careers/applications/jobs/results/\\d+"
+        assume_country: ch
+        fetch_details: true
+  - name: Apple
+    sector: Big tech
+    sources:
+      - ats: browser
+        urls: ["https://jobs.apple.com/en-us/search?search=intern&location=switzerland-CHE"]
+        link_pattern: "jobs\\.apple\\.com/[a-z-]+/details/\\d+"
+        assume_country: ch
+        fetch_details: true
+  - name: Meta
+    sector: Big tech
+    sources:
+      - ats: browser
+        urls: ["https://www.metacareers.com/jobs?q=intern&offices[0]=Zurich%2C%20Switzerland"]
+        link_pattern: "metacareers\\.com/(?:v2/)?jobs/\\d+"
+        assume_country: ch
+        fetch_details: false
+  - name: Microsoft
+    sector: Big tech
+    sources:
+      - ats: browser
+        urls: ["https://jobs.careers.microsoft.com/global/en/search?q=intern&lc=Switzerland"]
+        link_pattern: "(?:/global/en/job/\\d+|/careers/job/\\d+)"
+        assume_country: ch
+        fetch_details: false
+  - name: IBM Research
+    sector: Big tech
+    sources:
+      - ats: browser
+        urls: ["https://www.ibm.com/careers/search?q=intern&field_keyword_05[0]=Switzerland"]
+        link_pattern: "(?:jobId=\\d+|/job/\\d+)"
+        assume_country: ch
+        fetch_details: false
+  - name: Disney Research
+    sector: Research
+    sources: [{ats: workday, host: disney.wd5.myworkdayjobs.com, site: disneycareer}]   # guess; Zürich lab interns
+
+  # ---------------------------------------------------------------- Swiss AI startups & scale-ups
+  - name: Scandit
+    sector: AI startup
+    sources: [{ats: greenhouse, slug: scandit}]                   # Greenhouse verified; CV/ML internships, min 6 months
+  - name: ANYbotics
+    sector: Robotics
+    sources: [{ats: lever, slug: anybotics}]                      # verified; 6-month ML/RL internships
+  - name: EthonAI
+    sector: AI startup
+    sources: [{ats: recruitee, slug: ethonai}]                    # verified; ML / CV internships
+  - name: LatticeFlow AI
+    sector: AI startup
+    sources: [{ats: workable, slug: latticeflow}]                 # verified
+  - name: Visium
+    sector: AI consulting
+    sources: [{ats: workable, slug: visium}]                      # verified; 6-month ML internships (Lausanne/Zürich)
+  - name: Unit8
+    sector: AI consulting
+    sources: [{ats: workable, slug: unit8}]                       # verified
+  - name: Artifact
+    sector: AI consulting
+    sources: [{ats: recruitee, slug: artifactsa}]                 # verified; AI / data science internships
+  - name: INAIT
+    sector: AI startup
+    sources: [{ats: workable, slug: inaitsa}]                     # verified (Lausanne)
+  - name: Squirro
+    sector: AI startup
+    sources: [{ats: greenhouse, slug: squirro, region: eu}]       # verified
+  - name: Proton
+    sector: Tech
+    sources: [{ats: greenhouse, slug: proton, region: eu}]        # verified (Geneva / Zürich)
+  - name: Comparis
+    sector: Tech
+    sources: [{ats: personio, slug: comparis-ch}]                 # verified; ML/AI internship 6–12 months
+  - name: Climeworks
+    sector: Climate
+    sources: [{ats: recruitee, slug: climeworks}]                 # verified
+  - name: SOPHiA GENETICS
+    sector: Pharma & health
+    sources: [{ats: workable, slug: sophia-genetics}]             # verified (Rolle, data science interns)
+  - name: Nexthink
+    sector: Tech
+    sources: [{ats: smartrecruiters, slug: Nexthink}]             # guess (Lausanne; AI/ML interns)
+  - name: Cradle
+    sector: AI startup
+    sources: [{ats: auto, slugs: [cradlebio, cradle]}]
+  - name: Neural Concept
+    sector: AI startup
+    sources: [{ats: auto, slugs: [neuralconcept, neural-concept]}]
+  - name: Lakera
+    sector: AI startup
+    sources: [{ats: auto}]
+  - name: DeepJudge
+    sector: AI startup
+    sources: [{ats: auto}]
+  - name: Gravis Robotics
+    sector: Robotics
+    sources: [{ats: auto, slugs: [gravisrobotics, gravis]}]
+  - name: Mimic Robotics
+    sector: Robotics
+    sources: [{ats: auto, slugs: [mimicrobotics, mimic]}]
+  - name: Flexion Robotics
+    sector: Robotics
+    sources: [{ats: auto, slugs: [flexionrobotics, flexion]}]
+  - name: Jua
+    sector: AI startup
+    sources: [{ats: auto, slugs: [jua, juaai, jua-ai]}]
+  - name: Daedalean
+    sector: AI startup
+    sources: [{ats: auto}]
+  - name: Giotto.ai
+    sector: AI startup
+    sources: [{ats: auto, slugs: [giottoai, giotto]}]
+  - name: Lightly
+    sector: AI startup
+    sources: [{ats: auto, slugs: [lightly, lightlyai]}]
+  - name: Picterra
+    sector: AI startup
+    sources: [{ats: auto}]
+  - name: Wingtra
+    sector: Robotics
+    sources: [{ats: auto}]
+  - name: GetYourGuide
+    sector: Tech
+    sources: [{ats: auto}]
+  - name: Rapidata
+    sector: AI startup
+    sources: [{ats: auto}]
+
+  # ---------------------------------------------------------------- Pharma, industry, insurance, research
+  - name: Roche
+    sector: Pharma & health
+    sources: [{ats: workday, host: roche.wd3.myworkdayjobs.com, site: roche-ext}]  # host verified; site auto-detected if wrong
+  - name: Novartis
+    sector: Pharma & health
+    sources: [{ats: workday, host: novartis.wd3.myworkdayjobs.com, site: Novartis_Careers}]  # verified
+  - name: Sandoz
+    sector: Pharma & health
+    sources: [{ats: workday, host: sandoz.wd3.myworkdayjobs.com}]  # guess; site auto-detected
+  - name: Alcon
+    sector: Pharma & health
+    sources: [{ats: workday, host: alcon.wd5.myworkdayjobs.com}]   # guess; site auto-detected
+  - name: Logitech
+    sector: Tech
+    sources: [{ats: workday, host: logitech.wd5.myworkdayjobs.com, site: Logitech}]  # verified (Lausanne)
+  - name: Hitachi Energy
+    sector: Industry
+    sources: [{ats: workday, host: hitachi.wd1.myworkdayjobs.com, site: hitachi}]    # guess
+  - name: Swiss Re
+    sector: Insurance & finance
+    sources:
+      - ats: html                                                   # SAP SuccessFactors career site
+        urls:
+          - "https://careers.swissre.com/search/?q=intern&locationsearch=Switzerland"
+          - "https://careers.swissre.com/search/?q=intern&locationsearch=Switzerland&startrow=25"
+        link_pattern: "/job/[^/?#]+/\\d+/?$"
+        fetch_details: true
+  - name: CERN
+    sector: Research
+    sources: [{ats: smartrecruiters, slug: CERN}]                  # guess (technical student programme)
+
+  # ---------------------------------------------------------------- Aggregator (optional, free key)
+  - name: Adzuna (all companies)
+    key: adzuna
+    sector: Aggregator
+    sources: [{ats: adzuna}]
